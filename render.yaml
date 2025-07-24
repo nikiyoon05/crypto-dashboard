@@ -6,9 +6,9 @@ services:
     plan: free
     buildCommand: |
       cd backend
-      npm install --production=false
-      npm install --save-dev @types/node @types/express @types/cors @types/compression @types/sqlite3 @types/node-cron
-      npm run build
+      export NPM_CONFIG_PRODUCTION=false  # ensure dev deps are installed
+      npm install --legacy-peer-deps      # installs ALL deps incl. @types/*
+      npm run build                       # runs tsc
     startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
