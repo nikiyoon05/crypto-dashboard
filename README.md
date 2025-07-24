@@ -7,13 +7,13 @@ With paid crypto APIs, this project could serve much more real functionality.
 
 ## Features
 
-- 🔍 **Search Cryptocurrencies**: Search and discover any cryptocurrency
-- 📈 **Price Tracking**: Real-time price data and 24h changes
-- ⭐ **Watchlist Management**: Add/remove cryptocurrencies to your personal watchlist
-- 🔥 **Trending Cryptos**: View currently trending cryptocurrencies
-- 📊 **Interactive Charts**: Price history charts with multiple timeframes
-- 📱 **Responsive Design**: Clean, modern UI that works on all devices
-- 🚀 **Top 50 Cryptos**: Browse the top cryptocurrencies by market cap
+- **Search Cryptocurrencies**: Search and discover any cryptocurrency
+- **Price Tracking**: Real-time price data and 24h changes
+- **Watchlist Management**: Add/remove cryptocurrencies to your personal watchlist
+- **Trending Cryptos**: View currently trending cryptocurrencies
+- **Interactive Charts**: Price history charts with multiple timeframes
+- **Responsive Design**: Clean, modern UI that works on all devices
+- **Top 50 Cryptos**: Browse the top cryptocurrencies by market cap
 
 ## Tech Stack
 
@@ -36,10 +36,10 @@ With paid crypto APIs, this project could serve much more real functionality.
 ## Security
 
 ### Environment Variables
-- ✅ `.env` files are properly ignored by git
-- ✅ `env.example` provided as template
-- ✅ API keys never committed to version control
-- ✅ Comprehensive `.gitignore` for sensitive files
+- `.env` files are properly ignored by git
+- `env.example` provided as template
+- API keys never committed to version control
+- Comprehensive `.gitignore` for sensitive files
 
 ### Before Deployment
 1. **Never commit sensitive data**:
@@ -176,7 +176,7 @@ crypto-tracker/
 
 ### Trending Cryptocurrencies
 - Automatically updated hourly via cron job
-- Displays currently trending coins from CoinGecko
+- Displays currently trending coins from coinmarketcap
 - Real-time price and change data
 
 ## Deployment
@@ -220,4 +220,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [CoinMarketCap](https://coinmarketcap.com/) for providing cryptocurrency data
 - [Recharts](https://recharts.org/) for charting components
 - [Tailwind CSS](https://tailwindcss.com/) for styling
-- [Lucide](https://lucide.dev/) for icons 
+- [Lucide](https://lucide.dev/) for icons
+- [https://www.youtube.com/watch?v=vdxnBKRD7kU] a good youtube dashboard guide that I watched
