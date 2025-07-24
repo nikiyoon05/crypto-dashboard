@@ -1,8 +1,8 @@
-# 🚀 Deployment Guide - Render
+#  Deployment Guide - Render
 
 This guide will help you deploy the Crypto Tracker app to Render for free.
 
-## 📋 Prerequisites
+## Prerequisites
 
 1. **GitHub Repository**: Push your code to GitHub
 2. **Render Account**: Sign up at [render.com](https://render.com)
@@ -86,7 +86,7 @@ After deployment, you'll get URLs like:
 - **Frontend**: `https://crypto-tracker-frontend.onrender.com`
 - **Backend API**: `https://crypto-tracker-api.onrender.com`
 
-## ⚠️ Important Notes
+##  Important Notes
 
 ### Free Tier Limitations
 - **Cold starts**: Services may take 30-60 seconds to wake up after inactivity
@@ -98,7 +98,7 @@ After deployment, you'll get URLs like:
 - Consider upgrading to paid plans for production use
 - Database will be recreated on each deployment (expected behavior)
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Common Issues
 
@@ -126,7 +126,7 @@ Access logs in Render Dashboard:
 2. Click **"Logs"** tab
 3. Check for error messages
 
-## 🔄 Updates and Redeployment
+##  Updates and Redeployment
 
 Render automatically redeploys when you push to your connected GitHub branch:
 
@@ -136,7 +136,7 @@ git commit -m "Update app"
 git push origin main
 ```
 
-## 💡 Next Steps
+##  Next Steps
 
 After successful deployment:
 1. Test all features work correctly
