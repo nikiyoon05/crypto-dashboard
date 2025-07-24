@@ -146,4 +146,4 @@ After successful deployment:
 
 ---
 
-**🎉 Congratulations!** Your Crypto Tracker is now live on the web! 
+** Congratulations!** Your Crypto Tracker is now live on the web! 

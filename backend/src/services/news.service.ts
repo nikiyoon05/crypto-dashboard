@@ -76,7 +76,7 @@ async function scrapeFromRSS(source: any): Promise<NewsArticle[]> {
       }
     }
     
-    console.log(`✅ Found ${articles.length} articles from ${source.name}`);
+    console.log(`Found ${articles.length} articles from ${source.name}`);
     return articles;
   } catch (error) {
     console.error(`Error fetching from ${source.name}:`, error);
@@ -144,7 +144,7 @@ export async function getCachedCryptoNews(forceRefresh: boolean = false): Promis
   
   // Return cached news if it's still fresh and not forcing refresh
   if (!forceRefresh && newsCache && (now - newsCache.timestamp) < CACHE_DURATION) {
-    console.log('📋 Returning cached news');
+    console.log(' Returning cached news');
     return newsCache.articles;
   }
   
