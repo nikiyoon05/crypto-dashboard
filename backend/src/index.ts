@@ -11,6 +11,7 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 
 import { cryptoRoutes } from './routes/crypto.routes';
 import { watchlistRoutes } from './routes/watchlist.routes';
+import newsRoutes from './routes/news.routes';
 import { initializeDatabase } from './database/init';
 import { updateTrendingCryptos } from './services/crypto.service';
 
@@ -30,6 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/crypto', cryptoRoutes);
 app.use('/api/watchlist', watchlistRoutes);
+app.use('/api/news', newsRoutes);
 
 //Health check
 app.get('/api/health', (req, res) => {
