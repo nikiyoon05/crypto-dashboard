@@ -1,0 +1,642 @@
+import axios from 'axios';
+import { getDatabase } from '../database/init';
+import { CryptoData, TrendingCrypto, CoinMarketCapSearchResult, CoinMarketCapResponse } from '../types/crypto.types';
+
+const COINMARKETCAP_BASE_URL = 'https://pro-api.coinmarketcap.com/v1';
+const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY || 'e89bcfaa-a7fe-44fc-8f9a-0d371f101383';
+
+console.log('🔑 CoinMarketCap API Key loaded:', COINMARKETCAP_API_KEY ? 'YES' : 'NO');
+console.log('🔑 API Key length:', COINMARKETCAP_API_KEY?.length || 0);
+console.log('🔑 API Key first 10 chars:', COINMARKETCAP_API_KEY?.substring(0, 10) + '...');
+
+const axiosInstance = axios.create({
+  baseURL: COINMARKETCAP_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'X-CMC_PRO_API_KEY': COINMARKETCAP_API_KEY,
+    'Accept': 'application/json'
+  }
+});
+
+// Add request interceptor to debug headers
+axiosInstance.interceptors.request.use(
+  (config) => {
+    console.log(' Making API request to:', config.url);
+    console.log('heders:', JSON.stringify(config.headers, null, 2));
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Extended cryptocurrency list FOR FALLBACK!! 
+const EXTENDED_CRYPTO_LIST = [
+  // Top 50 by market cap
+  { id: '1', name: 'Bitcoin', symbol: 'BTC', slug: 'bitcoin', rank: 1 },
+  { id: '1027', name: 'Ethereum', symbol: 'ETH', slug: 'ethereum', rank: 2 },
+  { id: '825', name: 'Tether USDt', symbol: 'USDT', slug: 'tether', rank: 3 },
+  { id: '1839', name: 'BNB', symbol: 'BNB', slug: 'bnb', rank: 4 },
+  { id: '5426', name: 'Solana', symbol: 'SOL', slug: 'solana', rank: 5 },
+  { id: '52', name: 'XRP', symbol: 'XRP', slug: 'xrp', rank: 6 },
+  { id: '3408', name: 'USDC', symbol: 'USDC', slug: 'usd-coin', rank: 7 },
+  { id: '74', name: 'Dogecoin', symbol: 'DOGE', slug: 'dogecoin', rank: 8 },
+  { id: '2010', name: 'Cardano', symbol: 'ADA', slug: 'cardano', rank: 9 },
+  { id: '5805', name: 'Avalanche', symbol: 'AVAX', slug: 'avalanche', rank: 10 },
+  { id: '1975', name: 'Chainlink', symbol: 'LINK', slug: 'chainlink', rank: 11 },
+  { id: '6636', name: 'Polkadot', symbol: 'DOT', slug: 'polkadot-new', rank: 12 },
+  { id: '3890', name: 'Polygon', symbol: 'MATIC', slug: 'polygon', rank: 13 },
+  { id: '1958', name: 'TRON', symbol: 'TRX', slug: 'tron', rank: 14 },
+  { id: '4943', name: 'Dai', symbol: 'DAI', slug: 'multi-collateral-dai', rank: 15 },
+  
+  // Popular altcoins and DeFi tokens (16-100)
+  { id: '2', name: 'Litecoin', symbol: 'LTC', slug: 'litecoin', rank: 16 },
+  { id: '1831', name: 'Bitcoin Cash', symbol: 'BCH', slug: 'bitcoin-cash', rank: 17 },
+  { id: '4687', name: 'Binance USD', symbol: 'BUSD', slug: 'binance-usd', rank: 18 },
+  { id: '7083', name: 'Uniswap', symbol: 'UNI', slug: 'uniswap', rank: 19 },
+  { id: '3717', name: 'Wrapped Bitcoin', symbol: 'WBTC', slug: 'wrapped-bitcoin', rank: 20 },
+  { id: '4195', name: 'VeChain', symbol: 'VET', slug: 'vechain', rank: 21 },
+  { id: '1765', name: 'EOS', symbol: 'EOS', slug: 'eos', rank: 22 },
+  { id: '1518', name: 'Maker', symbol: 'MKR', slug: 'maker', rank: 23 },
+  { id: '4066', name: 'Chainlink', symbol: 'LINK', slug: 'chainlink', rank: 24 },
+  { id: '6892', name: 'Aave', symbol: 'AAVE', slug: 'aave', rank: 25 },
+  { id: '4030', name: 'Algorand', symbol: 'ALGO', slug: 'algorand', rank: 26 },
+  { id: '1274', name: 'Waves', symbol: 'WAVES', slug: 'waves', rank: 27 },
+  { id: '2563', name: 'TrueUSD', symbol: 'TUSD', slug: 'trueusd', rank: 28 },
+  { id: '3635', name: 'Crypto.com Coin', symbol: 'CRO', slug: 'cronos', rank: 29 },
+  { id: '5994', name: 'Shiba Inu', symbol: 'SHIB', slug: 'shiba-inu', rank: 30 },
+  
+  // Layer 2 and scaling solutions
+  { id: '5805', name: 'Avalanche', symbol: 'AVAX', slug: 'avalanche', rank: 31 },
+  { id: '4847', name: 'Smoothie', symbol: 'SMTX', slug: 'smoothie', rank: 32 },
+  { id: '9816', name: 'Arbitrum', symbol: 'ARB', slug: 'arbitrum', rank: 33 },
+  { id: '11841', name: 'Optimism', symbol: 'OP', slug: 'optimism-ethereum', rank: 34 },
+  
+  // Popular meme coins
+  { id: '74', name: 'Dogecoin', symbol: 'DOGE', slug: 'dogecoin', rank: 35 },
+  { id: '5994', name: 'Shiba Inu', symbol: 'SHIB', slug: 'shiba-inu', rank: 36 },
+  { id: '24478', name: 'Pepe', symbol: 'PEPE', slug: 'pepe', rank: 37 },
+  
+  // Gaming and NFT tokens
+  { id: '6758', name: 'The Sandbox', symbol: 'SAND', slug: 'the-sandbox', rank: 38 },
+  { id: '1966', name: 'Decentraland', symbol: 'MANA', slug: 'decentraland', rank: 39 },
+  { id: '7278', name: 'Aavegotchi', symbol: 'GHST', slug: 'aavegotchi', rank: 40 },
+  
+  // Enterprise and utility tokens
+  { id: '4256', name: 'Klaytn', symbol: 'KLAY', slug: 'klaytn', rank: 41 },
+  { id: '4157', name: 'THORChain', symbol: 'RUNE', slug: 'thorchain', rank: 42 },
+  { id: '4558', name: 'Flow', symbol: 'FLOW', slug: 'flow', rank: 43 },
+  { id: '1700', name: 'Aeternity', symbol: 'AE', slug: 'aeternity', rank: 44 },
+  
+  // Newer popular projects
+  { id: '21794', name: 'Aptos', symbol: 'APT', slug: 'aptos', rank: 45 },
+  { id: '22861', name: 'Sui', symbol: 'SUI', slug: 'sui', rank: 46 },
+  { id: '18876', name: 'Injective', symbol: 'INJ', slug: 'injective-protocol', rank: 47 },
+  { id: '11156', name: 'Render Token', symbol: 'RNDR', slug: 'render-token', rank: 48 },
+  { id: '6210', name: 'Sandbox', symbol: 'SAND', slug: 'the-sandbox', rank: 49 },
+  { id: '8916', name: 'Internet Computer', symbol: 'ICP', slug: 'internet-computer', rank: 50 }
+];
+
+export async function searchCryptos(query: string): Promise<CoinMarketCapSearchResult[]> {
+  try {
+    const searchQuery = query.toLowerCase().trim();
+    
+    // First search our extended local list for instant results
+    const localResults = EXTENDED_CRYPTO_LIST.filter((crypto: any) => 
+      crypto.symbol.toLowerCase().includes(searchQuery) ||
+      crypto.name.toLowerCase().includes(searchQuery)
+    );
+
+    // Try to get more results from the API for comprehensive coverage
+    // CoinMarketCap free tier supports up to 10,000 results on the map endpoint
+    let apiResults: any[] = [];
+    try {
+      console.log(`🔍 Searching for "${searchQuery}" - trying API first...`);
+      const response = await axiosInstance.get('/cryptocurrency/map', {
+        params: { 
+          limit: 5000, // Reduced from 10000 to be safe
+          listing_status: 'active' // Only get active cryptocurrencies
+        }
+      });
+      
+      console.log(`✅ API returned ${response.data.data.length} cryptocurrencies`);
+      
+      // Filter API results by query - both exact matches and partial matches
+      const allCryptos = response.data.data;
+      apiResults = allCryptos.filter((crypto: any) => {
+        const symbol = crypto.symbol.toLowerCase();
+        const name = crypto.name.toLowerCase();
+        
+        // Prioritize exact matches, then partial matches
+        return symbol === searchQuery || 
+               name === searchQuery ||
+               symbol.includes(searchQuery) ||
+               name.includes(searchQuery);
+      });
+      
+      console.log(`📊 Found ${apiResults.length} matches for "${searchQuery}"`);
+      
+      // Sort by relevance - exact matches first, then by rank
+      apiResults.sort((a: any, b: any) => {
+        const aSymbol = a.symbol.toLowerCase();
+        const bSymbol = b.symbol.toLowerCase();
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        
+        // Exact symbol match gets highest priority
+        if (aSymbol === searchQuery && bSymbol !== searchQuery) return -1;
+        if (bSymbol === searchQuery && aSymbol !== searchQuery) return 1;
+        
+        // Exact name match gets second priority
+        if (aName === searchQuery && bName !== searchQuery) return -1;
+        if (bName === searchQuery && aName !== searchQuery) return 1;
+        
+        // Symbol starts with query gets third priority
+        if (aSymbol.startsWith(searchQuery) && !bSymbol.startsWith(searchQuery)) return -1;
+        if (bSymbol.startsWith(searchQuery) && !aSymbol.startsWith(searchQuery)) return 1;
+        
+        // Name starts with query gets fourth priority
+        if (aName.startsWith(searchQuery) && !bName.startsWith(searchQuery)) return -1;
+        if (bName.startsWith(searchQuery) && !aName.startsWith(searchQuery)) return 1;
+        
+        // Finally sort by rank (lower rank = higher market cap)
+        return (a.rank || 999999) - (b.rank || 999999);
+      });
+      
+    } catch (apiError: any) {
+      console.log('❌ API search failed:', apiError.response?.status, apiError.response?.data?.status?.error_message);
+      console.log('🔄 Falling back to local results only');
+    }
+
+    // Combine results, prioritizing local list (more reliable) then API results
+    const combinedResults = new Map();
+    
+    // Add local results first (higher priority)
+    localResults.forEach((crypto: any) => {
+      combinedResults.set(crypto.id, {
+        id: crypto.id,
+        name: crypto.name,
+        symbol: crypto.symbol,
+        slug: crypto.slug,
+        rank: crypto.rank
+      });
+    });
+    
+    // Add API results that aren't already in local list
+    apiResults.slice(0, 50).forEach((crypto: any) => {
+      if (!combinedResults.has(crypto.id.toString())) {
+        combinedResults.set(crypto.id.toString(), {
+          id: crypto.id.toString(),
+          name: crypto.name,
+          symbol: crypto.symbol,
+          slug: crypto.slug,
+          rank: crypto.rank || 999999
+        });
+      }
+    });
+    
+    // Convert to array and sort by relevance (API already sorted by relevance)
+    const finalResults = Array.from(combinedResults.values())
+      .slice(0, 15); // Return top 15 results for better coverage
+    
+    return finalResults;
+  } catch (error: any) {
+    console.error('Error searching cryptos:', error);
+    console.error('Full error:', error.response?.data || error.message);
+    
+    // Fallback to extended crypto list search if API fails
+    const fallbackResults = EXTENDED_CRYPTO_LIST.filter((crypto: any) => 
+      crypto.symbol.toLowerCase().includes(query.toLowerCase()) ||
+      crypto.name.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    return fallbackResults.slice(0, 8);
+  }
+}
+
+export async function getCryptoData(cryptoIds: string[]): Promise<CryptoData[]> {
+  try {
+    const idsString = cryptoIds.join(',');
+    const response = await axiosInstance.get('/cryptocurrency/quotes/latest', {
+      params: {
+        id: idsString,
+        convert: 'USD'
+      }
+    });
+    
+    // Transform CoinMarketCap response to match our interface
+    const results = Object.values(response.data.data).map((crypto: any) => ({
+      id: crypto.id.toString(),
+      symbol: crypto.symbol,
+      name: crypto.name,
+      current_price: crypto.quote.USD.price,
+      market_cap: crypto.quote.USD.market_cap,
+      market_cap_rank: crypto.cmc_rank,
+      price_change_24h: crypto.quote.USD.price * (crypto.quote.USD.percent_change_24h / 100),
+      price_change_percentage_24h: crypto.quote.USD.percent_change_24h,
+      total_volume: crypto.quote.USD.volume_24h,
+      high_24h: crypto.quote.USD.price * (1 + Math.abs(crypto.quote.USD.percent_change_24h) / 100),
+      low_24h: crypto.quote.USD.price * (1 - Math.abs(crypto.quote.USD.percent_change_24h) / 100),
+      circulating_supply: crypto.circulating_supply,
+      total_supply: crypto.total_supply,
+      max_supply: crypto.max_supply,
+      image: `https://s2.coinmarketcap.com/static/img/coins/64x64/${crypto.id}.png`,
+      last_updated: crypto.last_updated
+    }));
+    
+    return results;
+  } catch (error) {
+    console.error('Error fetching crypto data:', error);
+    throw new Error('Failed to fetch cryptocurrency data');
+  }
+}
+
+export async function getCryptoDetails(cryptoId: string): Promise<any> {
+  try {
+    const response = await axiosInstance.get('/cryptocurrency/info', {
+      params: {
+        id: cryptoId
+      }
+    });
+    
+    const crypto = response.data.data[cryptoId];
+    return {
+      id: crypto.id,
+      name: crypto.name,
+      symbol: crypto.symbol,
+      description: crypto.description,
+      logo: crypto.logo,
+      website: crypto.urls.website,
+      technical_doc: crypto.urls.technical_doc,
+      twitter: crypto.urls.twitter,
+      reddit: crypto.urls.reddit,
+      message_board: crypto.urls.message_board,
+      announcement: crypto.urls.announcement,
+      chat: crypto.urls.chat,
+      explorer: crypto.urls.explorer,
+      source_code: crypto.urls.source_code,
+      tags: crypto.tags,
+      category: crypto.category,
+      date_added: crypto.date_added,
+      date_launched: crypto.date_launched
+    };
+  } catch (error) {
+    console.error('Error fetching crypto details:', error);
+    throw new Error('Failed to fetch cryptocurrency details');
+  }
+}
+
+export async function getHistoricalPrices(cryptoIds: string[], days: number = 30): Promise<{ [cryptoId: string]: [number, number][] }> {
+  try {
+    // Since CoinMarketCap doesn't provide historical data in free tier,
+    // we'll simulate historical data for portfolio analysis
+    const result: { [cryptoId: string]: [number, number][] } = {};
+    
+    for (const cryptoId of cryptoIds) {
+      // Get current price first
+      const currentPriceResponse = await axiosInstance.get('/cryptocurrency/quotes/latest', {
+        params: { id: cryptoId, convert: 'USD' }
+      });
+      
+      const currentPrice = currentPriceResponse.data.data[cryptoId]?.quote?.USD?.price || 100;
+      
+      // Generate simulated historical data
+      const historicalData: [number, number][] = [];
+      const now = Date.now();
+      const millisecondsPerDay = 24 * 60 * 60 * 1000;
+      
+      for (let i = days - 1; i >= 0; i--) {
+        const timestamp = now - (i * millisecondsPerDay);
+        // Simulate price with some volatility
+        const volatility = 0.05 + Math.random() * 0.1; // 5-15% daily volatility
+        const randomChange = (Math.random() - 0.5) * 2 * volatility;
+        const dayPrice = currentPrice * (1 + randomChange * (i + 1) / days);
+        historicalData.push([timestamp, Math.max(dayPrice, 0.01)]);
+      }
+      
+      result[cryptoId] = historicalData;
+    }
+    
+    return result;
+  } catch (error: any) {
+    console.error('Error fetching historical prices:', error);
+    throw new Error('Failed to fetch historical price data');
+  }
+}
+
+export async function getCryptoPriceHistory(cryptoId: string, days: number = 7): Promise<number[][]> {
+  try {
+    // CoinMarketCap doesn't have a direct historical endpoint in the basic plan
+    //  simulate historical data based on current price and volatility
+    const currentDataResponse = await axiosInstance.get('/cryptocurrency/quotes/latest', {
+      params: {
+        id: cryptoId,
+        convert: 'USD'
+      }
+    });
+    
+    const crypto = currentDataResponse.data.data[cryptoId];
+    const currentPrice = crypto.quote.USD.price;
+    const volatility = Math.abs(crypto.quote.USD.percent_change_24h) / 100;
+    
+    // Generate simulated historical data points
+    const dataPoints: number[][] = [];
+    const now = Date.now();
+    const intervalMs = days <= 1 ? 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 1 hour or 1 day
+    const totalPoints = days <= 1 ? 24 : Math.min(days, 30);
+    
+    for (let i = totalPoints - 1; i >= 0; i--) {
+      const timestamp = now - (i * intervalMs);
+      // Simulate price variation based on volatility
+      const randomFactor = (Math.random() - 0.5) * 2 * volatility;
+      const price = currentPrice * (1 + randomFactor * (i / totalPoints));
+      dataPoints.push([timestamp, Math.max(0, price)]);
+    }
+    
+    return dataPoints;
+  } catch (error) {
+    console.error('Error fetching price history:', error);
+    throw new Error('Failed to fetch price history');
+  }
+}
+
+export async function getTrendingCryptos(): Promise<CoinMarketCapResponse> {
+  try {
+    // CoinMarketCap doesn't have a trending endpoint, so we'll use top gainers
+    const response = await axiosInstance.get('/cryptocurrency/listings/latest', {
+      params: {
+        start: 1,
+        limit: 10,
+        convert: 'USD',
+        sort: 'percent_change_24h',
+        sort_dir: 'desc'
+      }
+    });
+    
+    return {
+      data: response.data.data.map((crypto: any) => ({
+        id: crypto.id,
+        name: crypto.name,
+        symbol: crypto.symbol,
+        slug: crypto.slug,
+        cmc_rank: crypto.cmc_rank,
+        quote: crypto.quote
+      }))
+    };
+  } catch (error) {
+    console.error('Error fetching trending cryptos:', error);
+    throw new Error('Failed to fetch trending cryptocurrencies');
+  }
+}
+
+export async function updateTrendingCryptos(): Promise<void> {
+  try {
+    const db = getDatabase();
+    const { promisify } = require('util');
+    const run = promisify(db.run.bind(db));
+    
+    const trendingData = await getTrendingCryptos();
+    
+    // Clear existing trending data
+    await run('DELETE FROM trending_cryptos');
+    
+    // Insert new trending data
+    const insertStmt = promisify(db.run.bind(db));
+    
+    for (const crypto of trendingData.data) {
+      await insertStmt(`
+        INSERT INTO trending_cryptos (
+          crypto_id, symbol, name, current_price, price_change_24h,
+          price_change_percentage_24h, market_cap, market_cap_rank, image
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        crypto.id.toString(),
+        crypto.symbol,
+        crypto.name,
+        crypto.quote.USD.price,
+        crypto.quote.USD.price * (crypto.quote.USD.percent_change_24h / 100),
+        crypto.quote.USD.percent_change_24h,
+        crypto.quote.USD.market_cap,
+        crypto.cmc_rank,
+        `https://s2.coinmarketcap.com/static/img/coins/64x64/${crypto.id}.png`
+      ]);
+    }
+    
+    console.log(`✅ Updated ${trendingData.data.length} trending cryptocurrencies`);
+  } catch (error) {
+    console.error('Error updating trending cryptos:', error);
+  }
+}
+
+interface PortfolioAsset {
+  id: string;
+  allocation: number; // as decimal (0.4 = 40%)
+}
+
+interface RiskMetrics {
+  volatility: number;
+  maxDrawdown: number;
+  valueAtRisk: number;
+  sharpeRatio: number;
+  expectedReturn: number;
+}
+
+export async function analyzePortfolio(assets: PortfolioAsset[], days: number = 30): Promise<{
+  metrics: RiskMetrics;
+  historicalReturns: number[];
+  cumulativeReturns: { date: string; portfolio: number; btc: number; eth: number }[];
+  assetContributions: { asset: string; riskContribution: number; returnContribution: number }[];
+}> {
+  try {
+    // Get historical price data for all assets
+    const cryptoIds = assets.map(asset => asset.id);
+    const historicalPrices = await getHistoricalPrices(cryptoIds, days);
+    
+    // Also get BTC and ETH for benchmarking
+    const btcData = await getHistoricalPrices(['1'], days); // Bitcoin
+    const ethData = await getHistoricalPrices(['1027'], days); // Ethereum
+    
+    // Calculate daily returns for each asset
+    const assetReturns: { [cryptoId: string]: number[] } = {};
+    
+    for (const cryptoId of cryptoIds) {
+      const prices = historicalPrices[cryptoId];
+      const returns: number[] = [];
+      
+      for (let i = 1; i < prices.length; i++) {
+        const returnValue = (prices[i][1] - prices[i-1][1]) / prices[i-1][1];
+        returns.push(returnValue);
+      }
+      
+      assetReturns[cryptoId] = returns;
+    }
+    
+    // Calculate portfolio daily returns
+    const portfolioReturns: number[] = [];
+    for (let day = 0; day < days - 1; day++) {
+      let portfolioReturn = 0;
+      for (const asset of assets) {
+        portfolioReturn += asset.allocation * assetReturns[asset.id][day];
+      }
+      portfolioReturns.push(portfolioReturn);
+    }
+    
+    // Calculate risk metrics
+    const avgReturn = portfolioReturns.reduce((sum, ret) => sum + ret, 0) / portfolioReturns.length;
+    const variance = portfolioReturns.reduce((sum, ret) => sum + Math.pow(ret - avgReturn, 2), 0) / portfolioReturns.length;
+    const volatility = Math.sqrt(variance * 252); // Annualized
+    
+    // Calculate max drawdown
+    let maxDrawdown = 0;
+    let peak = 100;
+    const cumulativePortfolio: number[] = [100];
+    
+    for (const dailyReturn of portfolioReturns) {
+      const newValue = cumulativePortfolio[cumulativePortfolio.length - 1] * (1 + dailyReturn);
+      cumulativePortfolio.push(newValue);
+      
+      if (newValue > peak) {
+        peak = newValue;
+      } else {
+        const drawdown = (peak - newValue) / peak;
+        maxDrawdown = Math.max(maxDrawdown, drawdown);
+      }
+    }
+    
+    // Calculate Value at Risk (5th percentile)
+    const sortedReturns = [...portfolioReturns].sort((a, b) => a - b);
+    const varIndex = Math.floor(sortedReturns.length * 0.05);
+    const valueAtRisk = Math.abs(sortedReturns[varIndex]);
+    
+    // Calculate Sharpe ratio (assuming 2% risk-free rate)
+    const riskFreeRate = 0.02 / 252; // Daily risk-free rate
+    const excessReturn = avgReturn - riskFreeRate;
+    const sharpeRatio = excessReturn / Math.sqrt(variance);
+    
+    // Calculate benchmarks (BTC and ETH returns)
+    const btcReturns = calculateReturns(btcData['1']);
+    const ethReturns = calculateReturns(ethData['1027']);
+    
+    // Create cumulative returns data for charting
+    const cumulativeReturns = [];
+    let portfolioCumulative = 100;
+    let btcCumulative = 100;
+    let ethCumulative = 100;
+    
+    for (let i = 0; i < portfolioReturns.length; i++) {
+      portfolioCumulative *= (1 + portfolioReturns[i]);
+      btcCumulative *= (1 + btcReturns[i]);
+      ethCumulative *= (1 + ethReturns[i]);
+      
+      cumulativeReturns.push({
+        date: new Date(Date.now() - (portfolioReturns.length - i - 1) * 24 * 60 * 60 * 1000).toLocaleDateString(),
+        portfolio: portfolioCumulative,
+        btc: btcCumulative,
+        eth: ethCumulative
+      });
+    }
+    
+    // Calculate asset contributions
+    const assetContributions = assets.map(asset => {
+      const assetVolatility = Math.sqrt(
+        assetReturns[asset.id].reduce((sum, ret) => {
+          const avgAssetReturn = assetReturns[asset.id].reduce((s, r) => s + r, 0) / assetReturns[asset.id].length;
+          return sum + Math.pow(ret - avgAssetReturn, 2);
+        }, 0) / assetReturns[asset.id].length
+      );
+      
+      const avgAssetReturn = assetReturns[asset.id].reduce((sum, ret) => sum + ret, 0) / assetReturns[asset.id].length;
+      
+      return {
+        asset: asset.id,
+        riskContribution: asset.allocation * assetVolatility,
+        returnContribution: asset.allocation * avgAssetReturn
+      };
+    });
+    
+    return {
+      metrics: {
+        volatility,
+        maxDrawdown,
+        valueAtRisk,
+        sharpeRatio,
+        expectedReturn: avgReturn * 252 // Annualized
+      },
+      historicalReturns: portfolioReturns,
+      cumulativeReturns,
+      assetContributions
+    };
+    
+  } catch (error: any) {
+    console.error('Error analyzing portfolio:', error);
+    throw new Error('Failed to analyze portfolio');
+  }
+}
+
+function calculateReturns(prices: [number, number][]): number[] {
+  const returns: number[] = [];
+  for (let i = 1; i < prices.length; i++) {
+    returns.push((prices[i][1] - prices[i-1][1]) / prices[i-1][1]);
+  }
+  return returns;
+}
+
+export async function getStoredTrendingCryptos(): Promise<TrendingCrypto[]> {
+  const db = getDatabase();
+  const { promisify } = require('util');
+  const all = promisify(db.all.bind(db));
+  
+  const results = await all(`
+    SELECT * FROM trending_cryptos 
+    ORDER BY market_cap_rank ASC
+  `);
+  
+  return results as TrendingCrypto[];
+}
+
+export async function getTopCryptos(limit: number = 50): Promise<CryptoData[]> {
+  try {
+    console.log('Fetching top cryptos with limit:', limit);
+    const response = await axiosInstance.get('/cryptocurrency/listings/latest', {
+      params: {
+        start: 1,
+        limit: Math.min(limit, 100), // CoinMarketCap free tier limits
+        convert: 'USD'
+      }
+    });
+    
+    console.log('CoinMarketCap response status:', response.status);
+    console.log('Data length:', response.data.data?.length);
+    
+    // Transform CoinMarketCap response to match our interface
+    const results = response.data.data.map((crypto: any) => ({
+      id: crypto.id.toString(),
+      symbol: crypto.symbol,
+      name: crypto.name,
+      current_price: crypto.quote.USD.price,
+      market_cap: crypto.quote.USD.market_cap,
+      market_cap_rank: crypto.cmc_rank,
+      price_change_24h: crypto.quote.USD.price * (crypto.quote.USD.percent_change_24h / 100),
+      price_change_percentage_24h: crypto.quote.USD.percent_change_24h,
+      total_volume: crypto.quote.USD.volume_24h,
+      high_24h: crypto.quote.USD.price * (1 + Math.abs(crypto.quote.USD.percent_change_24h / 100)),
+      low_24h: crypto.quote.USD.price * (1 - Math.abs(crypto.quote.USD.percent_change_24h / 100)),
+      circulating_supply: crypto.circulating_supply,
+      total_supply: crypto.total_supply,
+      max_supply: crypto.max_supply,
+      image: `https://s2.coinmarketcap.com/static/img/coins/64x64/${crypto.id}.png`,
+      last_updated: crypto.last_updated
+    }));
+    
+    return results;
+  } catch (error: any) {
+    console.error('Error fetching top cryptos:', error);
+    console.error('Full error details:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw new Error('Failed to fetch top cryptocurrencies');
+  }
+} 
