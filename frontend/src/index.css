@@ -1,0 +1,79 @@
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700,800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white bg-subtle-grid text-neutral-900 font-sans antialiased;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-neutral-100;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-neutral-300 rounded-none;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-neutral-400;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-primary-900 text-white font-medium 
+           hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 
+           focus:ring-offset-2 transition-all duration-200 shadow-elegant hover:shadow-elegant-lg 
+           transform hover:-translate-y-0.5;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-white text-neutral-700 font-medium border border-neutral-200
+           hover:bg-neutral-50 hover:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-400 
+           focus:ring-offset-2 transition-all duration-200 shadow-elegant hover:shadow-elegant-lg 
+           transform hover:-translate-y-0.5;
+  }
+  
+  .btn-accent {
+    @apply px-6 py-3 bg-accent-900 text-white font-medium
+           hover:bg-accent-800 focus:outline-none focus:ring-2 focus:ring-accent-500
+           focus:ring-offset-2 transition-all duration-200 shadow-elegant hover:shadow-elegant-lg 
+           transform hover:-translate-y-0.5;
+  }
+  
+  .card {
+    @apply bg-white shadow-elegant border border-neutral-200/50 p-6 
+           hover:shadow-elegant-lg transition-all duration-200 hover:border-neutral-300/50;
+  }
+  
+  .card-elevated {
+    @apply bg-white shadow-elegant-lg border border-neutral-200/50 p-8 
+           hover:shadow-elegant-xl transition-all duration-200;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-neutral-300 
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 
+           focus:bg-white transition-all duration-200 placeholder-neutral-500 font-medium;
+  }
+  
+  .nav-pill {
+    @apply flex items-center space-x-3 px-6 py-3 font-medium text-sm transition-all duration-200
+           relative overflow-hidden;
+  }
+  
+  .nav-pill-active {
+    @apply bg-primary-900 text-white shadow-elegant;
+  }
+  
+  .nav-pill-inactive {
+    @apply text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100;
+  }
+}
