@@ -19,11 +19,10 @@ services:
         value: ./data/crypto_tracker.db
     
   # Frontend Static Site
-  - type: web
+  - type: static
     name: crypto-tracker-frontend
-    env: static
     buildCommand: npm --prefix frontend install && npm --prefix frontend run build
-    staticPublishPath: frontend/build
+    publishPath: frontend/build
     envVars:
       - key: REACT_APP_API_URL
         sync: false 
