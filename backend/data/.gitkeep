@@ -1,0 +1,2 @@
+# This file ensures the data directory is created during deployment
+# SQLite database files will be created here at runtime 

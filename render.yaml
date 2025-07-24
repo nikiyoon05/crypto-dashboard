@@ -1,0 +1,36 @@
+services:
+  # Backend API Service
+  - type: web
+    name: crypto-tracker-api
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: crypto-tracker-frontend
+          property: url
+      - key: COINMARKETCAP_API_KEY
+        sync: false
+      - key: DATABASE_PATH
+        value: ./data/crypto_tracker.db
+    
+  # Frontend Static Site
+  - type: web
+    name: crypto-tracker-frontend
+    env: static
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          type: web
+          name: crypto-tracker-api
+          property: url 
