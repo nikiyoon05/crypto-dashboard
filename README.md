@@ -17,10 +17,11 @@ A full-stack cryptocurrency tracking application built with React, TypeScript, N
 ### Backend
 - **Node.js** with **TypeScript**
 - **Express.js** for REST API
-- **SQLite** with **better-sqlite3** for data storage
+- **SQLite** with **sqlite3** for data storage
 - **Axios** for external API calls
 - **CoinMarketCap API** for cryptocurrency data
 - **Node-cron** for scheduled data updates
+- **RSS Parser** for crypto news aggregation
 
 ### Frontend
 - **React** with **TypeScript**
@@ -28,6 +29,37 @@ A full-stack cryptocurrency tracking application built with React, TypeScript, N
 - **Recharts** for data visualization
 - **Lucide React** for icons
 - **Axios** for API communication
+
+## Security
+
+### Environment Variables
+- ✅ `.env` files are properly ignored by git
+- ✅ `env.example` provided as template
+- ✅ API keys never committed to version control
+- ✅ Comprehensive `.gitignore` for sensitive files
+
+### Before Deployment
+1. **Never commit sensitive data**:
+   ```bash
+   # Check what files git is tracking
+   git status
+   
+   # Verify .env is ignored
+   git check-ignore -v backend/.env
+   ```
+
+2. **Use environment variables for**:
+   - API keys (`COINMARKETCAP_API_KEY`)
+   - Database paths
+   - Port configurations
+   - Frontend URLs
+
+3. **Security checklist**:
+   - [ ] `.env` file is not in git history
+   - [ ] API keys are in environment variables only
+   - [ ] Production uses HTTPS
+   - [ ] Database files are not committed
+   - [ ] Secrets are not in code or logs
 
 ## Project Structure
 

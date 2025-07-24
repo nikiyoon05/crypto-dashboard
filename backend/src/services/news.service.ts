@@ -12,6 +12,8 @@ export interface NewsArticle {
   imageUrl?: string;
 }
 
+// use RSS parser to get news from coindesk, cointelegraph, and crypto news
+
 const rssParser = new Parser({
   customFields: {
     item: ['media:content', 'media:thumbnail']
@@ -39,7 +41,7 @@ const NEWS_SOURCES = [
 
 async function scrapeFromRSS(source: any): Promise<NewsArticle[]> {
   try {
-    console.log(`📰 Fetching news from ${source.name}...`);
+    console.log(` Fetching news from ${source.name}...`);
     
     const feed = await rssParser.parseURL(source.rssUrl);
     const articles: NewsArticle[] = [];
@@ -49,7 +51,7 @@ async function scrapeFromRSS(source: any): Promise<NewsArticle[]> {
     
     for (const item of items) {
       if (item.title && item.link) {
-        // Generate a simple ID from the URL
+        // generate a simple ID from the URL
         const id = Buffer.from(item.link).toString('base64').substring(0, 16);
         
         // Extract image URL from various possible fields
@@ -77,14 +79,14 @@ async function scrapeFromRSS(source: any): Promise<NewsArticle[]> {
     console.log(`✅ Found ${articles.length} articles from ${source.name}`);
     return articles;
   } catch (error) {
-    console.error(`❌ Error fetching from ${source.name}:`, error);
+    console.error(`Error fetching from ${source.name}:`, error);
     return [];
   }
 }
 
 export async function getCryptoNews(): Promise<NewsArticle[]> {
   try {
-    console.log('🔄 Starting crypto news aggregation...');
+    console.log('Starting crypto news aggregation...');
     
     // Fetch from all RSS sources in parallel
     const newsPromises = NEWS_SOURCES.map(source => scrapeFromRSS(source));
@@ -103,11 +105,11 @@ export async function getCryptoNews(): Promise<NewsArticle[]> {
     // Return top 10 most recent articles
     const topArticles = allArticles.slice(0, 10);
     
-    console.log(`📊 Total articles collected: ${allArticles.length}, returning top ${topArticles.length}`);
+    console.log(`Total articles collected: ${allArticles.length}, returning top ${topArticles.length}`);
     return topArticles;
     
   } catch (error) {
-    console.error('❌ Error in getCryptoNews:', error);
+    console.error('Error in getCryptoNews:', error);
     
     // Return mock data as fallback
     return [
@@ -147,7 +149,7 @@ export async function getCachedCryptoNews(forceRefresh: boolean = false): Promis
   }
   
   // Fetch fresh news
-  console.log(forceRefresh ? '🔄 Force refreshing news...' : '🔄 Cache expired, fetching fresh news...');
+  console.log(forceRefresh ? ' Force refreshing news...' : ' Cache expired, fetching fresh news...');
   const articles = await getCryptoNews();
   
   // Update cache

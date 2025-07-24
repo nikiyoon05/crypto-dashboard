@@ -2,12 +2,26 @@
 node_modules/
 */node_modules/
 
-# Environment variables
+# Environment variables & Secrets
 .env
+.env.*
+!.env.example
+*.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# API Keys & Secrets
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+config/secrets/
+.secrets
+api-keys.json
+credentials.json
 
 # Build outputs
 build/

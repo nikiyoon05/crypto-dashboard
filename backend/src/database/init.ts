@@ -59,7 +59,7 @@ export async function initializeDatabase(): Promise<void> {
   await run('CREATE INDEX IF NOT EXISTS idx_price_history_crypto_id ON price_history(crypto_id)');
   await run('CREATE INDEX IF NOT EXISTS idx_price_history_timestamp ON price_history(timestamp)');
 
-  console.log('✅ Database initialized successfully');
+  console.log('dcatabase initialized successfully');
 }
 
 export function closeDatabase(): void {
