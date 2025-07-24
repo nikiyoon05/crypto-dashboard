@@ -28,8 +28,15 @@ git push origin main
 2. Click **"New"** → **"Blueprint"**
 3. Connect your GitHub repository
 4. Render will automatically detect the `render.yaml` file
-5. Set environment variables:
+5. Set environment variables for both services:
+   
+   **Backend Service (crypto-tracker-api):**
    - `COINMARKETCAP_API_KEY`: Your API key from CoinMarketCap
+   
+   **Frontend Service (crypto-tracker-frontend):**
+   - `REACT_APP_API_URL`: `https://crypto-tracker-api.onrender.com/api`
+   
+   ⚠️ **Important**: You'll need to set the frontend's `REACT_APP_API_URL` after the backend is deployed and you know its URL.
 
 #### Option B: Manual Service Creation
 
