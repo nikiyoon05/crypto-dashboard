@@ -4,7 +4,8 @@ services:
     name: crypto-tracker-api
     env: node
     plan: free
-    buildCommand: cd backend && npm install --production=false && npx tsc
+    installCommand: cd backend && npm ci --include=dev
+    buildCommand: cd backend && npm run build
     startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
