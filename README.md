@@ -1,6 +1,9 @@
 # Crypto Tracker
 
-A full-stack cryptocurrency tracking application built with React, TypeScript, Node.js, and Express. Track cryptocurrency prices, manage your watchlist, view trending coins, and analyze price charts.
+This is a project I started to mimic a modern  full-stack cryptocurrency tracking application built with React, TypeScript, Node.js, and Express. THe features are: track cryptocurrency prices, manage your watchlist, view trending coins, and analyze price charts.
+
+I used youtube tutorials and other website examples to learn typescript and graph/dashboard designs. 
+With paid crypto APIs, this project could serve much more real functionality.
 
 ## Features
 

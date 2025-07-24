@@ -359,7 +359,7 @@ export async function getCryptoPriceHistory(cryptoId: string, days: number = 7):
 
 export async function getTrendingCryptos(): Promise<CoinMarketCapResponse> {
   try {
-    // CoinMarketCap doesn't have a trending endpoint, so  use top gainers
+    // CoinMarketCap doesn't have a trending endpoint, so 'll use top gainers
     const response = await axiosInstance.get('/cryptocurrency/listings/latest', {
       params: {
         start: 1,
