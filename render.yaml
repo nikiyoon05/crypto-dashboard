@@ -7,6 +7,7 @@ services:
     buildCommand: |
       cd backend
       npm install --production=false
+      npm install --save-dev @types/node @types/express @types/cors @types/compression @types/sqlite3 @types/node-cron
       npm run build
     startCommand: cd backend && npm start
     envVars:
