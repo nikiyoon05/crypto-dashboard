@@ -176,7 +176,7 @@ crypto-tracker/
 
 ### Trending Cryptocurrencies
 - Automatically updated hourly via cron job
-- Displays currently trending coins from CoinGecko
+- Displays currently trending coins from coinmarketcap
 - Real-time price and change data
 
 ## Deployment
