@@ -4,7 +4,7 @@ services:
     name: crypto-tracker-api
     env: node
     plan: free
-    rootDirectory: backend
+    rootDir: backend
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
@@ -23,7 +23,7 @@ services:
   - type: web
     name: crypto-tracker-frontend
     env: static
-    rootDirectory: frontend
+    rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: build
     envVars:
