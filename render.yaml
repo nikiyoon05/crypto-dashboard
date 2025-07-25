@@ -23,7 +23,7 @@ services:
     name: crypto-tracker-frontend
     env: static
     buildCommand: npm --prefix frontend install && npm --prefix frontend run build
-    publishPath: frontend/build
+    staticPublishPath: frontend/build
     envVars:
       - key: REACT_APP_API_URL
         sync: false 
