@@ -21,11 +21,22 @@ const PORT = process.env.PORT || 3001;
 //Middleware
 app.use(helmet());
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:3000',
-    'https://crypto-tracker-frontend.onrender.com',
-    /\.onrender\.com$/
-  ],
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      'https://crypto-tracker-frontend.onrender.com', // Keep this for the base name
+    ];
+
+    // Check if the origin is in the allowed list or ends with .onrender.com
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.onrender.com')) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(compression());
